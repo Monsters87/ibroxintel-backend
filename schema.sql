@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS players (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  position VARCHAR(50),
+  age INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS rumours (
+  id SERIAL PRIMARY KEY,
+  player_name VARCHAR(100) REFERENCES players(name),
+  rumour TEXT
+);
