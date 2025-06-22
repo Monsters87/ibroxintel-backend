@@ -1,14 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const db = require("./db"); // ✅ REQUIRED
-const runScraper = require("./scraper"); // ✅ for /scrape route
+const db = require("./db");
+const runScraper = require("./scraper");
 
 // Health check
 router.get("/", (req, res) => {
-  res.send("✅ IbroxIntel backend is live!");
+  res.send("IbroxIntel backend is live!");
 });
 
-// Init DB
+// One-time DB setup route
 router.get("/init-db", async (req, res) => {
   try {
     await db.query(`
@@ -19,31 +19,10 @@ router.get("/init-db", async (req, res) => {
         value TEXT
       );
     `);
-
-    await db.query(`
-      CREATE TABLE IF NOT EXISTS rumours (
-        id SERIAL PRIMARY KEY,
-        player TEXT NOT NULL,
-        source TEXT NOT NULL,
-        credibility TEXT
-      );
-    `);
-
-    res.send("✅ Players and rumours tables created (or already exist).");
+    res.send("✅ Players table created (or already exists).");
   } catch (error) {
     console.error(error);
-    res.status(500).send("❌ Failed to create tables.");
-  }
-});
-
-// Scrape dummy data
-router.get("/scrape", async (req, res) => {
-  try {
-    await runScraper();
-    res.send("✅ Scraping complete.");
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("❌ Scraping failed.");
+    res.status(500).send("❌ Failed to create table.");
   }
 });
 
@@ -53,20 +32,20 @@ router.get("/players", async (req, res) => {
     const result = await db.query("SELECT * FROM players");
     res.json(result.rows);
   } catch (error) {
-    console.error(error);
-    res.status(500).send("❌ Failed to fetch players.");
+    console.error("Error fetching players:", error);
+    res.status(500).json({ error: "Failed to fetch players" });
   }
 });
 
-// View rumours
-router.get("/rumours", async (req, res) => {
+// Manual scraper route (runs only when triggered)
+router.get("/scrape", async (req, res) => {
   try {
-    const result = await db.query("SELECT * FROM rumours");
-    res.json(result.rows);
+    await runScraper();
+    res.send("✅ Scraping and database update complete.");
   } catch (error) {
     console.error(error);
-    res.status(500).send("❌ Failed to fetch rumours.");
+    res.status(500).send("❌ Scraping failed.");
   }
 });
 
-module.exports = router; // ✅ MANDATORY
+module.exports = router;
