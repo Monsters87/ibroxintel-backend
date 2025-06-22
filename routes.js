@@ -1,3 +1,5 @@
+const express = require("express");
+const router = express.Router();
 router.get("/init-db", async (req, res) => {
   try {
     await db.query(`
