@@ -1,34 +1,35 @@
-const express = require("express");
-const router = express.Router();
 const db = require("./db");
 
-// Get all rumours
-router.get("/", async (req, res) => {
+async function runRumourScraper() {
   try {
-    const result = await db.query("SELECT * FROM rumours");
-    res.json(result.rows);
-  } catch (error) {
-    console.error("Error fetching rumours:", error);
-    res.status(500).json({ error: "Failed to fetch rumours" });
-  }
-});
+    const rumours = [
+      { player: "Todd Cantwell", source: "BBC Sport", credibility: "High" },
+      { player: "James Tavernier", source: "Sky Sports", credibility: "Medium" },
+      { player: "Jack Butland", source: "Daily Record", credibility: "Low" }
+    ];
 
-// One-time table setup (optional but useful)
-router.get("/init", async (req, res) => {
-  try {
-    await db.query(`
-      CREATE TABLE IF NOT EXISTS rumours (
-        id SERIAL PRIMARY KEY,
-        player TEXT NOT NULL,
-        source TEXT NOT NULL,
-        rumour TEXT NOT NULL
+    for (const rumour of rumours) {
+      const existing = await db.query(
+        "SELECT * FROM rumours WHERE player = $1 AND source = $2",
+        [rumour.player, rumour.source]
       );
-    `);
-    res.send("✅ Rumours table created or already exists.");
-  } catch (error) {
-    console.error("Rumours table creation failed:", error);
-    res.status(500).send("❌ Could not create rumours table.");
-  }
-});
 
-module.exports = router;
+      if (existing.rows.length === 0) {
+        await db.query(
+          "INSERT INTO rumours (player, source, credibility) VALUES ($1, $2, $3)",
+          [rumour.player, rumour.source, rumour.credibility]
+        );
+        console.log(`✅ Added rumour: ${rumour.player} from ${rumour.source}`);
+      } else {
+        console.log(`⏩ Skipped duplicate: ${rumour.player} from ${rumour.source}`);
+      }
+    }
+
+    console.log("✅ Rumours scraping complete.");
+  } catch (error) {
+    console.error("❌ Rumour scraper error:", error);
+    throw error;
+  }
+}
+
+module.exports = runRumourScraper;
