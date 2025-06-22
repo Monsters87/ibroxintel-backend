@@ -2,36 +2,35 @@ const db = require("./db");
 
 async function runScraper() {
   try {
-    // Dummy rumours to simulate a real scrape
-    const rumours = [
-      {
-        player_name: "John Lundstram",
-        source: "Sky Sports",
-        rumour: "Linked with a move to Sheffield United",
-        credibility: 75
-      },
-      {
-        player_name: "Rabbi Matondo",
-        source: "Daily Record",
-        rumour: "Potential loan to Ligue 1",
-        credibility: 60
-      },
-      {
-        player_name: "Ridvan Yilmaz",
-        source: "BBC Sport",
-        rumour: "Subject of interest from Turkish clubs",
-        credibility: 85
-      }
+    // Dummy player data
+    const players = [
+      { name: "Todd Cantwell", position: "Midfielder", value: "£3.5M" },
+      { name: "James Tavernier", position: "Defender", value: "£4M" },
+      { name: "Jack Butland", position: "Goalkeeper", value: "£2M" }
     ];
 
-    for (const rumour of rumours) {
+    // Dummy rumours data
+    const rumours = [
+      { player: "Todd Cantwell", source: "BBC Sport", credibility: "High" },
+      { player: "James Tavernier", source: "Sky Sports", credibility: "Medium" },
+      { player: "Jack Butland", source: "Daily Record", credibility: "Low" }
+    ];
+
+    for (const player of players) {
       await db.query(
-        "INSERT INTO rumours (player_name, source, rumour, credibility) VALUES ($1, $2, $3, $4)",
-        [rumour.player_name, rumour.source, rumour.rumour, rumour.credibility]
+        "INSERT INTO players (name, position, value) VALUES ($1, $2, $3)",
+        [player.name, player.position, player.value]
       );
     }
 
-    console.log("✅ Dummy rumours inserted.");
+    for (const rumour of rumours) {
+      await db.query(
+        "INSERT INTO rumours (player, source, credibility) VALUES ($1, $2, $3)",
+        [rumour.player, rumour.source, rumour.credibility]
+      );
+    }
+
+    console.log("✅ Dummy players and rumours inserted.");
   } catch (error) {
     console.error("❌ Scraper error:", error);
     throw error;
