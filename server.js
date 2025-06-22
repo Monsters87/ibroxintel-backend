@@ -11,3 +11,4 @@ app.use("/api", routes);
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+setInterval(() => {}, 1 << 30); // Keeps the server alive indefinitely
