@@ -12,5 +12,5 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-// Keeps Railway container from sleeping
+// Keeps Railway container alive
 setInterval(() => {}, 1 << 30);
