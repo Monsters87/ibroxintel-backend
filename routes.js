@@ -1,21 +1,24 @@
 const express = require("express");
 const router = express.Router();
-const { Pool } = require("pg");
-require("dotenv").config();
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+// Health check route
+router.get("/", (req, res) => {
+  res.send("IbroxIntel backend is live!");
 });
 
-router.get("/players", async (req, res) => {
-  const { rows } = await pool.query("SELECT * FROM players");
-  res.json(rows);
+// Example route: scrape trigger (if needed later)
+router.get("/scrape", (req, res) => {
+  // Placeholder logic
+  res.send("Scraping not yet implemented.");
 });
 
-router.get("/rumours", async (req, res) => {
-  const { rows } = await pool.query("SELECT * FROM rumours");
-  res.json(rows);
+// Example route: player stats (stubbed)
+router.get("/players", (req, res) => {
+  // Placeholder response
+  res.json([
+    { name: "Player One", position: "Midfielder", value: "£2M" },
+    { name: "Player Two", position: "Defender", value: "£1.5M" }
+  ]);
 });
 
 module.exports = router;
