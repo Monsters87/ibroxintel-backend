@@ -35,5 +35,16 @@ router.get("/players", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch players" });
   }
 });
+const runScraper = require("./scraper"); // Add this at the top of your file if it’s not there
 
+// Scraper route (manual trigger)
+router.get("/scrape", async (req, res) => {
+  try {
+    await runScraper();
+    res.send("✅ Scraping and database update complete.");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("❌ Scraping failed.");
+  }
+});
 module.exports = router;
