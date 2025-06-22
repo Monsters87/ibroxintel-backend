@@ -1,24 +1,34 @@
 const express = require("express");
 const router = express.Router();
+const { Pool } = require("pg");
+
+// PostgreSQL connection
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
 
 // Health check route
 router.get("/", (req, res) => {
   res.send("IbroxIntel backend is live!");
 });
 
-// Example route: scrape trigger (if needed later)
-router.get("/scrape", (req, res) => {
-  // Placeholder logic
-  res.send("Scraping not yet implemented.");
+// Get player data from the database
+router.get("/players", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT name, position, value FROM players");
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error fetching players:", error);
+    res.status(500).json({ error: "Failed to fetch players" });
+  }
 });
 
-// Example route: player stats (stubbed)
-router.get("/players", (req, res) => {
-  // Placeholder response
-  res.json([
-    { name: "Player One", position: "Midfielder", value: "£2M" },
-    { name: "Player Two", position: "Defender", value: "£1.5M" }
-  ]);
+// Future: scraper trigger route
+router.get("/scrape", (req, res) => {
+  res.send("Scraping not yet implemented.");
 });
 
 module.exports = router;
