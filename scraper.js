@@ -2,21 +2,36 @@ const db = require("./db");
 
 async function runScraper() {
   try {
-    // Dummy players to simulate a real scrape
-    const players = [
-      { name: "Todd Cantwell", position: "Midfielder", value: "£3.5M" },
-      { name: "James Tavernier", position: "Defender", value: "£4M" },
-      { name: "Jack Butland", position: "Goalkeeper", value: "£2M" }
+    // Dummy rumours to simulate a real scrape
+    const rumours = [
+      {
+        player_name: "John Lundstram",
+        source: "Sky Sports",
+        rumour: "Linked with a move to Sheffield United",
+        credibility: 75
+      },
+      {
+        player_name: "Rabbi Matondo",
+        source: "Daily Record",
+        rumour: "Potential loan to Ligue 1",
+        credibility: 60
+      },
+      {
+        player_name: "Ridvan Yilmaz",
+        source: "BBC Sport",
+        rumour: "Subject of interest from Turkish clubs",
+        credibility: 85
+      }
     ];
 
-    for (const player of players) {
+    for (const rumour of rumours) {
       await db.query(
-        "INSERT INTO players (name, position, value) VALUES ($1, $2, $3)",
-        [player.name, player.position, player.value]
+        "INSERT INTO rumours (player_name, source, rumour, credibility) VALUES ($1, $2, $3, $4)",
+        [rumour.player_name, rumour.source, rumour.rumour, rumour.credibility]
       );
     }
 
-    console.log("✅ Dummy player data inserted.");
+    console.log("✅ Dummy rumours inserted.");
   } catch (error) {
     console.error("❌ Scraper error:", error);
     throw error;
