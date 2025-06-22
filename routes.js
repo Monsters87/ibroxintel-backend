@@ -8,7 +8,7 @@ router.get("/", (req, res) => {
   res.send("IbroxIntel backend is live!");
 });
 
-// Create players table
+// Create tables if they don't exist
 router.get("/init-db", async (req, res) => {
   try {
     await db.query(`
@@ -27,14 +27,14 @@ router.get("/init-db", async (req, res) => {
         credibility TEXT
       );
     `);
-    res.send("✅ Players and rumours tables created (or already exist).");
+    res.send("✅ Tables created or already exist.");
   } catch (error) {
     console.error(error);
     res.status(500).send("❌ Failed to create tables.");
   }
 });
 
-// View players
+// Get all players
 router.get("/players", async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM players");
@@ -45,7 +45,7 @@ router.get("/players", async (req, res) => {
   }
 });
 
-// View rumours
+// Get all rumours
 router.get("/rumours", async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM rumours");
@@ -67,15 +67,20 @@ router.get("/rumours/clear", async (req, res) => {
   }
 });
 
-// Manual scraper
+// Manual scraper run
 router.get("/scrape", async (req, res) => {
   try {
     await runScraper();
     res.send("✅ Scraping and database update complete.");
   } catch (error) {
-    console.error(error);
+    console.error("❌ Scraping failed:", error);
     res.status(500).send("❌ Scraping failed.");
   }
 });
 
-module.exports = router;
+// 🔄 Clear rumours and re-scrape
+router.get("/reset", async (req, res) => {
+  try {
+    await db.query("DELETE FROM rumours");
+    await runScraper();
+    res.send("♻️ Rumours reset and re
