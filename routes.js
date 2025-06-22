@@ -2,13 +2,14 @@ const express = require("express");
 const router = express.Router();
 const db = require("./db");
 const runScraper = require("./scraper");
+const runRumourScraper = require("./rumours");
 
 // Health check
 router.get("/", (req, res) => {
-  res.send("IbroxIntel backend is live!");
+  res.send("✅ IbroxIntel backend is live!");
 });
 
-// Create tables if they don't exist
+// Init players table
 router.get("/init-db", async (req, res) => {
   try {
     await db.query(`
@@ -19,6 +20,16 @@ router.get("/init-db", async (req, res) => {
         value TEXT
       );
     `);
+    res.send("✅ Players table created (or already exists).");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("❌ Failed to create players table.");
+  }
+});
+
+// Init rumours table
+router.get("/init-rumours", async (req, res) => {
+  try {
     await db.query(`
       CREATE TABLE IF NOT EXISTS rumours (
         id SERIAL PRIMARY KEY,
@@ -27,14 +38,14 @@ router.get("/init-db", async (req, res) => {
         credibility TEXT
       );
     `);
-    res.send("✅ Tables created or already exist.");
+    res.send("✅ Rumours table created (or already exists).");
   } catch (error) {
     console.error(error);
-    res.status(500).send("❌ Failed to create tables.");
+    res.status(500).send("❌ Failed to create rumours table.");
   }
 });
 
-// Get all players
+// View players
 router.get("/players", async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM players");
@@ -45,7 +56,7 @@ router.get("/players", async (req, res) => {
   }
 });
 
-// Get all rumours
+// View rumours
 router.get("/rumours", async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM rumours");
@@ -56,31 +67,38 @@ router.get("/rumours", async (req, res) => {
   }
 });
 
-// Clear all rumours
-router.get("/rumours/clear", async (req, res) => {
-  try {
-    await db.query("DELETE FROM rumours");
-    res.send("✅ All rumours deleted.");
-  } catch (error) {
-    console.error("❌ Failed to delete rumours:", error);
-    res.status(500).send("❌ Failed to delete rumours.");
-  }
-});
-
-// Manual scraper run
+// Manual scrape players
 router.get("/scrape", async (req, res) => {
   try {
     await runScraper();
-    res.send("✅ Scraping and database update complete.");
+    res.send("✅ Players scraping complete.");
   } catch (error) {
-    console.error("❌ Scraping failed:", error);
-    res.status(500).send("❌ Scraping failed.");
+    console.error(error);
+    res.status(500).send("❌ Scraping players failed.");
   }
 });
 
-// 🔄 Clear rumours and re-scrape
+// Manual scrape rumours
+router.get("/scrape-rumours", async (req, res) => {
+  try {
+    await runRumourScraper();
+    res.send("✅ Rumours scraping complete.");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("❌ Scraping rumours failed.");
+  }
+});
+
+// Clear and re-scrape rumours
 router.get("/reset", async (req, res) => {
   try {
     await db.query("DELETE FROM rumours");
-    await runScraper();
-    res.send("♻️ Rumours reset and re
+    await runRumourScraper();
+    res.send("♻️ Rumours reset and reloaded.");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("❌ Reset failed.");
+  }
+});
+
+module.exports = router;
