@@ -1,30 +1,32 @@
+// scraper.js
 const axios = require("axios");
-const { Pool } = require("pg");
-require("dotenv").config();
+const db = require("./db");
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
+async function fetchAndStorePlayers() {
+  try {
+    // TEMP: using placeholder data
+    const players = [
+      { name: "Player One", position: "Midfielder", value: "£2M" },
+      { name: "Player Two", position: "Defender", value: "£1.5M" },
+    ];
 
-async function scrapeAndStore() {
-  const dummyRumours = [
-    { player_name: "Todd Cantwell", position: "Midfielder", age: 26, rumour: "Linked with Leeds United" },
-    { player_name: "Connor Goldson", position: "Defender", age: 31, rumour: "Offered new contract" }
-  ];
+    for (const player of players) {
+      await db.query(
+        `INSERT INTO players (name, position, value)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (name) DO NOTHING`,
+        [player.name, player.position, player.value]
+      );
+    }
 
-  for (const r of dummyRumours) {
-    await pool.query(
-      "INSERT INTO players (name, position, age) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING",
-      [r.player_name, r.position, r.age]
-    );
-    await pool.query(
-      "INSERT INTO rumours (player_name, rumour) VALUES ($1, $2)",
-      [r.player_name, r.rumour]
-    );
+    console.log("Player data inserted successfully");
+  } catch (error) {
+    console.error("Error inserting players:", error.message);
   }
-
-  console.log("Rumours inserted.");
 }
 
-scrapeAndStore();
+if (require.main === module) {
+  fetchAndStorePlayers();
+}
+
+module.exports = fetchAndStorePlayers;
