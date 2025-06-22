@@ -1,21 +1,15 @@
 const express = require("express");
-const cors = require("cors");
 const app = express();
-const PORT = process.env.PORT || 8080;
+const routes = require("./routes"); // Make sure this path correctly points to routes.js
+require("dotenv").config();
 
-// Enable CORS and JSON parsing
-app.use(cors());
+const PORT = process.env.PORT || 3000;
+
 app.use(express.json());
+app.use("/api", routes); // All routes will be at /api/...
 
-// Import routes correctly
-const routes = require("./routes");
-app.use("/api", routes);
+app.get("/", (req, res) => res.send("IbroxIntel backend is live!"));
 
-// Root endpoint
-app.get("/", (req, res) => {
-  res.send("✅ IbroxIntel backend running");
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+setInterval(() => {}, 1 << 30); // Keeps the container alive
