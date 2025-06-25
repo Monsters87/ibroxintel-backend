@@ -1,15 +1,36 @@
-const express = require("express");
+const express = require('express');
+const cors = require('cors');
 const app = express();
-const routes = require("./routes"); // Make sure this path correctly points to routes.js
-require("dotenv").config();
-
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
-app.use("/api", routes); // All routes will be at /api/...
+const rumours = [
+  { id: 7, player: 'Todd Cantwell', source: 'BBC Sport', credibility: 'High' },
+  { id: 8, player: 'James Tavernier', source: 'Sky Sports', credibility: 'Medium' },
+  { id: 9, player: 'Jack Butland', source: 'Daily Record', credibility: 'Low' }
+];
 
-app.get("/", (req, res) => res.send("IbroxIntel backend is live!"));
+const squad = [
+  { name: 'Todd Cantwell', position: 'Midfielder', value: '£3.5M' },
+  { name: 'James Tavernier', position: 'Defender', value: '£4M' },
+  { name: 'Jack Butland', position: 'Goalkeeper', value: '£2M' }
+];
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// ✅ Allow requests from the Netlify frontend
+app.use(cors({
+  origin: ['https://ibroxintel.netlify.app'],
+  methods: ['GET']
+}));
 
-setInterval(() => {}, 1 << 30); // Keeps the container alive
+// Routes
+app.get('/api/rumours', (req, res) => {
+  res.json(rumours);
+});
+
+app.get('/api/squad', (req, res) => {
+  res.json(squad);
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`✅ Backend running on port ${PORT}`);
+});
